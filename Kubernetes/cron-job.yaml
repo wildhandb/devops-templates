@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nginx-cronjob
+  labels:
+    app: nginx
+spec:
+  schedule: "*/5 * * * *" # Setiap 5 menit
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: nginx
+        spec:
+          containers:
+            - name: nginx
+              image: nginx:latest
+              ports:
+                - containerPort: 80
+          restartPolicy: OnFailure
+      nodeSelector:
+        disktype: ssd

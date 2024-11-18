@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment # Nama unik untuk Deployment
+  labels:
+    app: nginx # Label untuk aplikasi nginx
+spec:
+  replicas: 3 # Menjalankan 3 replika dari Pod ini
+  selector:
+    matchLabels:
+      app: nginx # Menyesuaikan dengan label Pod yang akan dijalankan
+  template:
+    metadata:
+      labels:
+        app: nginx # Label pada Pod template
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest # Gambar yang digunakan untuk menjalankan kontainer
+          ports:
+            - containerPort: 80 # Port yang digunakan kontainer
+          resources:
+            requests:
+              memory: "64Mi" # Meminta memori 64Mi untuk kontainer
+              cpu: "250m" # Meminta CPU 250 milicpu
+            limits:
+              memory: "128Mi" # Batasan memori kontainer di 128Mi
+              cpu: "500m" # Batasan CPU kontainer di 500 milicpu
+          livenessProbe:
+            httpGet:
+              path: /healthz # Jalankan HTTP GET ke /healthz untuk memeriksa apakah kontainer hidup
+              port: 80 # Port yang digunakan untuk memeriksa kontainer
+            initialDelaySeconds: 5 # Tunggu 5 detik setelah kontainer dimulai sebelum probe dijalankan
+            periodSeconds: 10 # Lakukan pemeriksaan setiap 10 detik
+            failureThreshold: 3 # Gagal 3 kali berturut-turut, kontainer dianggap mati
+          readinessProbe:
+            httpGet:
+              path: / # Jalankan HTTP GET ke / untuk memeriksa apakah kontainer siap
+              port: 80 # Port yang digunakan untuk memeriksa kesiapan
+            initialDelaySeconds: 10 # Tunggu 10 detik setelah kontainer dimulai sebelum pemeriksaan pertama
+            periodSeconds: 5 # Lakukan pemeriksaan setiap 5 detik
+            failureThreshold: 2 # Gagal 2 kali berturut-turut, Pod dianggap belum siap
+            successThreshold: 1 # Satu keberhasilan berturut-turut dianggap siap
+      nodeSelector:
+        disktype: ssd # Pod ini hanya akan dijadwalkan pada node dengan label "disktype: ssd"
